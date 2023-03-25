@@ -3,14 +3,20 @@
 @tailwind utilities;
 
 body {
-    @apply bg-zinc-900 h-full overflow-x-hidden;
+    @apply bg-zinc-900 overflow-x-hidden;
+    min-height: 100vh;
 }
 
 #__next {
     @apply h-full;
+    min-height: 100vh;
 }
 
 html {
-    @apply h-full;
+    /*@apply h-full;*/
+}
+
+html * {
+    box-sizing: border-box;
 }
 

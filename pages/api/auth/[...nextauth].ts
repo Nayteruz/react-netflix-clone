@@ -2,18 +2,7 @@ import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials";
 import prismadb from "@/lib/prismadb";
 import { compare } from "bcrypt";
-
-interface CredentialsProps {
-    email: {
-        label: string;
-        type: string;
-    },
-    password: {
-        label: string;
-        type: string;
-    }
-}
-
+// ts-ignore
 export default NextAuth({
     providers: [
         Credentials({
@@ -30,11 +19,11 @@ export default NextAuth({
                 }
             },
             async authorize(credentials) {
-                if (credentials?.email || !credentials?.password) {
+                if (!credentials?.email || !credentials?.password) {
                     throw new Error('Email and password required')
                 }
-
-                const user = await prismadb.user.fingUnique({
+                await prismadb.$connect();
+                const user = await prismadb.user.findUnique({
                     where: {
                         email: credentials.email
                     }
@@ -52,7 +41,7 @@ export default NextAuth({
                 if (!isCorrectPassword) {
                     throw new Error('Incorrect password');
                 }
-
+                await prismadb.$disconnect()
                 return user;
             }
         })
