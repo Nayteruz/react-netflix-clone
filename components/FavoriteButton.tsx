@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, {useCallback, useMemo} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import {AiOutlinePlus, AiOutlineCheck} from "react-icons/ai"
 
 import useCurrentUser from "@/hooks/useCurrentUser";
@@ -11,8 +11,9 @@ interface FavoriteButtonProps {
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({movieId}) => {
 
-    const {mutate: mutateFavorites} = useFavorites();
-    const {data: currentUser, mutate} = useCurrentUser();
+    const { mutate: mutateFavorites } = useFavorites();
+    const { data: currentUser, mutate } = useCurrentUser();
+    const [isLoading, setIsLoading] = useState(false);
 
     const isFavorite = useMemo(() => {
         const list = currentUser?.favoriteIds || [];
@@ -20,8 +21,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({movieId}) => {
     }, [currentUser, movieId])
 
     const toggleFavorites = useCallback(async () => {
+        setIsLoading(true);
         let response;
-
         if (isFavorite) {
             response = await axios.delete('/api/favorite', {data: {movieId}})
         } else {
@@ -36,7 +37,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({movieId}) => {
         });
 
         mutateFavorites();
-    }, [movieId, isFavorite, currentUser, mutate, mutateFavorites])
+        setIsLoading(false);
+    }, [movieId, isFavorite, currentUser, mutate, mutateFavorites, isLoading])
 
     const Icon = isFavorite ? AiOutlineCheck : AiOutlinePlus;
 
@@ -58,8 +60,20 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({movieId}) => {
             justify-center
             transition
             hover:border-neutral-300
+            relative
         ">
-            <Icon className="text-white" size={25}/>
+            {isLoading && <span
+              className="
+              absolute
+              w-2/3
+              h-2/3
+              rounded-full
+              border-4
+              border-green-600
+              border-b-green-200
+              animate-spin
+              "></span>}
+            {!isLoading && <Icon className="text-white" size={25}/>}
         </div>
     )
 }
